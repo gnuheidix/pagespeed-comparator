@@ -1,0 +1,2 @@
+// goto https://code.google.com/apis/console to get a key
+var googleApiKey = '';

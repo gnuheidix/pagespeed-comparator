@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Parteien-PageSpeed-Vergleich</title>
+</head>
+<body>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript" src="apikey.js"></script>
+<script type="text/javascript" src="pagespeed-comparator.js"></script>
+<script>
+var comparator = new PageSpeedComparator(googleApiKey, 'comparator');
+comparator.compare(
+	{
+		'http://www.cdu.de/': 'cdu',
+		'http://www.csu.de/': 'csu',
+		'http://www.spd.de/': 'spd',
+		'http://www.fdp.de/': 'fdp',
+		'http://www.die-linke.de/': 'linke',
+		'http://www.gruene.de/': 'gruene',
+		'http://www.piratenpartei.de/': 'piraten',
+		'http://www.freiewaehler.eu/': 'fw',
+		'http://www.alternativefuer.de/': 'afd',
+		'http://www.mlpd.de/': 'mlpd'
+	},
+	document.getElementsByTagName('body')[0]
+);
+</script>
+</body>
+</html> 
