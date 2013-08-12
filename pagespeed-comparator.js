@@ -36,7 +36,8 @@ function PageSpeedComparator(apiKey, callbackInstanceName){
 	this.callbackInstanceName = callbackInstanceName;
 	this.openCallbacks = 0;
 	this.siteList = [];
-	this.results = [["", "Score"]];
+	this.scoreResults = [];
+	this.rawResults = [];
 	this.pagespeedURL = 'https://www.googleapis.com/pagespeedonline/v1/runPagespeed?';
 }
 
@@ -87,10 +88,13 @@ PageSpeedComparator.prototype.pageSpeedCallback = function(result){
 
 // updates the progress bar and triggers graph rendering
 PageSpeedComparator.prototype.processResult = function(result){
-	this.results.push([
+	this.scoreResults.push([
 		this.siteList[result.request.url],
 		result.score
 	]);
+	this.rawResults.push(
+		result
+	);
 	
 	this.resultElement.innerHTML = '<progress value="' + (Object.keys(this.siteList).length - this.openCallbacks) + '" max="' + Object.keys(this.siteList).length + '"></progress>';
 	
@@ -102,17 +106,36 @@ PageSpeedComparator.prototype.processResult = function(result){
 // output graph using Google Charts
 PageSpeedComparator.prototype.renderResult = function(){
 
-	var dataTable = google.visualization.arrayToDataTable(this.results);
+	var self = this;
 	
-	new google.visualization.ColumnChart(
-		this.resultElement
-	).draw(
+	var columnChart = new google.visualization.ColumnChart(this.resultElement)	
+	columnChart.setAction({
+		id: 'pagelink',
+		text: 'getestete Seite aufrufen',
+		action: function(){
+			var selection = columnChart.getSelection();
+			window.location = self.rawResults[selection[0].row].request.url;
+		}
+	});
+
+	var dataTable = new google.visualization.DataTable();
+	dataTable.addColumn('string', '');
+	dataTable.addColumn('number', 'Score');
+	dataTable.addRows(this.scoreResults);
+		
+	columnChart.draw(
 		dataTable,
 		{
-			//width: this.siteList.length * 100,
 			height:500,
-			vAxis: {title: "Score"},
-			legend: {position: 'none'}
+			vAxis: {
+				title: "Score"
+			},
+			legend: {
+				position: 'none'
+			},
+			tooltip: {
+				trigger: 'selection'
+			}
 		}
 	);
 }
