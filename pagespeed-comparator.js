@@ -56,7 +56,7 @@ PageSpeedComparator.prototype.compare = function(siteList, resultElement){
 	}
 }
 
-// does an JSONP-request
+// does a JSONP-request
 PageSpeedComparator.prototype.fetchPageSpeedResults = function(siteName, siteURL){
 	var s = document.createElement('script');
 	s.type = 'text/javascript';
