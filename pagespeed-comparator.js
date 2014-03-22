@@ -38,6 +38,7 @@ function PageSpeedComparator(apiKey, callbackInstanceName){
 	this.siteList = [];
 	this.scoreResults = [];
 	this.rawResults = [];
+	this.resultElement = null;
 	this.pagespeedURL = 'https://www.googleapis.com/pagespeedonline/v1/runPagespeed?';
 }
 
@@ -48,13 +49,15 @@ PageSpeedComparator.prototype.compare = function(siteList, resultElement){
 		alert('Google jsapi fehlt');
 	}else{
 		google.load('visualization', '1', {packages: ['corechart']});
-		for(var siteURL in siteList){
-			this.fetchPageSpeedResults(siteList[siteURL], siteURL);
+		for(var siteName in siteList){
+			this.fetchPageSpeedResults(siteName, siteList[siteName]);
 		}
 		this.siteList = siteList;
 		this.resultElement = resultElement;
 	}
 }
+
+PageSpeedComparator.prototype.callbacks = {};
 
 // does a JSONP-request
 PageSpeedComparator.prototype.fetchPageSpeedResults = function(siteName, siteURL){
@@ -63,33 +66,34 @@ PageSpeedComparator.prototype.fetchPageSpeedResults = function(siteName, siteURL
 	s.async = true;
 	var query = [
 		'url=' + siteURL,
-		'callback=' + this.callbackInstanceName + '.pageSpeedCallback',
+		'callback=' + this.callbackInstanceName + '.callbacks.'+siteName,
 		'prettyprint=false',
 		'key=' + this.apiKey,
 	].join('&');
 
-	this.openCallbacks++;	
+	// register callback handler
+	var self = this;
+	this.callbacks[siteName] = function(result){
+		--self.openCallbacks;
+		if(result.error){
+			var errors = result.error.errors;
+			for (var i = 0, len = errors.length; i < len; ++i) {
+				self.resultElement.innerHTML = '<p>' + (errors[i].message) + '</p>';
+			}
+		}else{
+			self.processResult(siteName, result);
+		}	
+	};
+
+	this.openCallbacks++;
 	s.src = this.pagespeedURL + query;
 	document.head.insertBefore(s, null);
 }
 
-// gets called by the PageSpeed JSONP
-PageSpeedComparator.prototype.pageSpeedCallback = function(result){
-	--this.openCallbacks;
-	if(result.error){
-		var errors = result.error.errors;
-		for (var i = 0, len = errors.length; i < len; ++i) {
-			this.resultElement.innerHTML = '<p>' + (errors[i].message) + '</p>';
-		}
-	}else{
-		this.processResult(result);
-	}	
-}
-
 // updates the progress bar and triggers graph rendering
-PageSpeedComparator.prototype.processResult = function(result){
+PageSpeedComparator.prototype.processResult = function(siteName, result){
 	this.scoreResults.push([
-		this.siteList[result.request.url],
+		siteName,
 		result.score
 	]);
 	this.rawResults.push(
@@ -107,14 +111,13 @@ PageSpeedComparator.prototype.processResult = function(result){
 PageSpeedComparator.prototype.renderResult = function(){
 
 	var self = this;
-	
 	var columnChart = new google.visualization.ColumnChart(this.resultElement)	
 	columnChart.setAction({
 		id: 'pagelink',
 		text: 'getestete Seite aufrufen',
 		action: function(){
 			var selection = columnChart.getSelection();
-			window.location = self.rawResults[selection[0].row].request.url;
+			window.location = self.rawResults[selection[0].row].id;
 		}
 	});
 
@@ -128,7 +131,11 @@ PageSpeedComparator.prototype.renderResult = function(){
 		{
 			height:500,
 			vAxis: {
-				title: "Score"
+				title: "Score",
+				viewWindow:{
+					max:100.1,
+					min:0
+				}
 			},
 			legend: {
 				position: 'none'

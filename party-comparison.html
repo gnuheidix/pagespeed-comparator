@@ -12,16 +12,17 @@
 var comparator = new PageSpeedComparator(googleApiKey, 'comparator');
 comparator.compare(
 	{
-		'http://www.cdu.de/': 'cdu',
-		'http://www.csu.de/': 'csu',
-		'http://www.spd.de/': 'spd',
-		'http://www.fdp.de/': 'fdp',
-		'http://www.die-linke.de/': 'linke',
-		'http://www.gruene.de/': 'gruene',
-		'http://www.piratenpartei.de/': 'piraten',
-		'http://www.freiewaehler.eu/': 'fw',
-		'http://www.alternativefuer.de/': 'afd',
-		'http://www.mlpd.de/': 'mlpd'
+		'cdu': 'http://www.cdu.de/',
+		'csu': 'http://www.csu.de/',
+		'spd': 'http://www.spd.de/',
+		'fdp': 'http://www.fdp.de/',
+		'linke': 'http://www.die-linke.de/',
+		'gruene': 'http://www.gruene.de/',
+		'piraten': 'http://www.piratenpartei.de/',
+		'fw': 'http://www.freiewaehler.eu/',
+		'afd': 'http://www.alternativefuer.de/',
+		'mlpd': 'http://www.mlpd.de/',
+		'gnuheidix': 'http://gnuheidix.de/',
 	},
 	document.getElementsByTagName('body')[0]
 );
